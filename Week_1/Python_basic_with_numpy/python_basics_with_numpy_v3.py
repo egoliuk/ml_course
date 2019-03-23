@@ -620,7 +620,7 @@ def L1(yhat, y):
     """
     
     ### START CODE HERE ### (≈ 1 line of code)
-    loss = None
+    loss = np.sum(np.abs(yhat - y))
     ### END CODE HERE ###
     
     return loss
@@ -665,7 +665,9 @@ def L2(yhat, y):
     """
     
     ### START CODE HERE ### (≈ 1 line of code)
-    loss = None
+    loss = np.sum((yhat - y)**2)
+    # diff = yhat - y
+    # loss = np.dot(diff, diff)
     ### END CODE HERE ###
     
     return loss
