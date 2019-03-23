@@ -80,9 +80,9 @@ print ("y = " + str(train_set_y[:, index]) + ", it's a '" + classes[np.squeeze(t
 
 
 ### START CODE HERE ### (≈ 3 lines of code)
-m_train = None
-m_test = None
-num_px = None
+m_train = train_set_x_orig.shape[0]
+m_test = test_set_x_orig.shape[0]
+num_px = train_set_x_orig.shape[1]
 ### END CODE HERE ###
 
 print ("Number of training examples: m_train = " + str(m_train))
@@ -130,8 +130,10 @@ print ("test_set_y shape: " + str(test_set_y.shape))
 # Reshape the training and test examples
 
 ### START CODE HERE ### (≈ 2 lines of code)
-train_set_x_flatten = None
-test_set_x_flatten = None
+train_set_x_flatten = train_set_x_orig.reshape(train_set_x_orig.shape[0], -1).T
+# train_set_x_flatten = train_set_x_orig.reshape(train_set_x_orig.shape[0], (train_set_x_orig.shape[1]*train_set_x_orig.shape[2]*train_set_x_orig.shape[3])).T
+test_set_x_flatten = test_set_x_orig.reshape(test_set_x_orig.shape[0], -1).T
+# test_set_x_flatten = test_set_x_orig.reshape(test_set_x_orig.shape[0], (test_set_x_orig.shape[1]*test_set_x_orig.shape[2]*test_set_x_orig.shape[3])).T
 ### END CODE HERE ###
 
 print ("train_set_x_flatten shape: " + str(train_set_x_flatten.shape))
@@ -247,7 +249,7 @@ def sigmoid(z):
     """
 
     ### START CODE HERE ### (≈ 1 line of code)
-    s = None
+    s = 1 / (1 + np.exp(-z))
     ### END CODE HERE ###
     
     return s
@@ -290,8 +292,8 @@ def initialize_with_zeros(dim):
     """
     
     ### START CODE HERE ### (≈ 1 line of code)
-    w = None
-    b = None
+    w = np.zeros((dim, 1))
+    b = 0
     ### END CODE HERE ###
 
     assert(w.shape == (dim, 1))
@@ -372,14 +374,14 @@ def propagate(w, b, X, Y):
     
     # FORWARD PROPAGATION (FROM X TO COST)
     ### START CODE HERE ### (≈ 2 lines of code)
-    A = None                                    # compute activation
-    cost = None                                 # compute cost
+    A = sigmoid(np.dot(w.T, X) + b)                                # compute activation
+    cost = (-1/m) * np.sum(Y * np.log(A) + (1-Y) * np.log(1-A))    # compute cost
     ### END CODE HERE ###
     
     # BACKWARD PROPAGATION (TO FIND GRAD)
     ### START CODE HERE ### (≈ 2 lines of code)
-    dw = None
-    db = None
+    dw = (1/m) * np.dot(X, (A-Y).T)
+    db = (1/m) * np.sum(A-Y)
     ### END CODE HERE ###
 
     assert(dw.shape == w.shape)
@@ -465,7 +467,7 @@ def optimize(w, b, X, Y, num_iterations, learning_rate, print_cost = False):
         
         # Cost and gradient calculation (≈ 1-4 lines of code)
         ### START CODE HERE ### 
-        grads, cost = None
+        grads, cost = propagate(w, b, X, Y)
         ### END CODE HERE ###
         
         # Retrieve derivatives from grads
@@ -474,8 +476,8 @@ def optimize(w, b, X, Y, num_iterations, learning_rate, print_cost = False):
         
         # update rule (≈ 2 lines of code)
         ### START CODE HERE ###
-        w = None
-        b = None
+        w = w - learning_rate * dw
+        b = b - learning_rate * db
         ### END CODE HERE ###
         
         # Record the costs
@@ -561,16 +563,19 @@ def predict(w, b, X):
     
     # Compute vector "A" predicting the probabilities of a cat being present in the picture
     ### START CODE HERE ### (≈ 1 line of code)
-    A = None
+    A = sigmoid(np.dot(w.T, X) + b)
     ### END CODE HERE ###
-    
-    for i in range(A.shape[1]):
+
+    # for i in range(A.shape[1]):
         
         # Convert probabilities A[0,i] to actual predictions p[0,i]
         ### START CODE HERE ### (≈ 4 lines of code)
-        pass
+        # Y_prediction[0, i] = 1 if A[0, i] > .5 else 0
         ### END CODE HERE ###
-    
+
+    # There is a way to vectorize this and avoid using loop
+    Y_prediction = np.where(A > .5, 1, 0)
+
     assert(Y_prediction.shape == (1, m))
     
     return Y_prediction
@@ -643,18 +648,18 @@ def model(X_train, Y_train, X_test, Y_test, num_iterations = 2000, learning_rate
     ### START CODE HERE ###
     
     # initialize parameters with zeros (≈ 1 line of code)
-    w, b = None
+    w, b = initialize_with_zeros(X_train.shape[0])
 
     # Gradient descent (≈ 1 line of code)
-    parameters, grads, costs = None
+    parameters, grads, costs = optimize(w, b, X_train, Y_train, num_iterations, learning_rate, print_cost)
     
     # Retrieve parameters w and b from dictionary "parameters"
     w = parameters["w"]
     b = parameters["b"]
     
     # Predict test/train set examples (≈ 2 lines of code)
-    Y_prediction_test = None
-    Y_prediction_train = None
+    Y_prediction_test = predict(w, b, X_test)
+    Y_prediction_train = predict(w, b, X_train)
 
     ### END CODE HERE ###
 
@@ -792,7 +797,7 @@ plt.show()
 
 
 ## START CODE HERE ## (PUT YOUR IMAGE NAME) 
-my_image = "my_image.jpg"   # change this to the name of your image file 
+my_image = "space_cat.jpg"   # change this to the name of your image file
 ## END CODE HERE ##
 
 # We preprocess the image to fit your algorithm.
