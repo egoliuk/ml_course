@@ -31,7 +31,7 @@
 
 
 ### START CODE HERE ### (≈ 1 line of code)
-test = None
+test = "Hello World"
 ### END CODE HERE ###
 
 
@@ -86,7 +86,7 @@ def basic_sigmoid(x):
     """
     
     ### START CODE HERE ### (≈ 1 line of code)
-    s = None
+    s = 1/(1+math.exp(-x))
     ### END CODE HERE ###
     
     return s
@@ -177,7 +177,7 @@ def sigmoid(x):
     """
     
     ### START CODE HERE ### (≈ 1 line of code)
-    s = None
+    s = 1/(1+np.exp(-x))
     ### END CODE HERE ###
     
     return s
@@ -226,8 +226,8 @@ def sigmoid_derivative(x):
     """
     
     ### START CODE HERE ### (≈ 2 lines of code)
-    s = None
-    ds = None
+    s = sigmoid(x)
+    ds = s*(1-s)
     ### END CODE HERE ###
     
     return ds
@@ -282,7 +282,7 @@ def image2vector(image):
     """
     
     ### START CODE HERE ### (≈ 1 line of code)
-    v = None
+    v = image.reshape((image.shape[0]*image.shape[1]*image.shape[2]), 1)
     ### END CODE HERE ###
     
     return v
@@ -373,10 +373,10 @@ def normalizeRows(x):
     
     ### START CODE HERE ### (≈ 2 lines of code)
     # Compute x_norm as the norm 2 of x. Use np.linalg.norm(..., ord = 2, axis = ..., keepdims = True)
-    x_norm = None
+    x_norm = np.linalg.norm(x, ord = 2, axis = 1, keepdims = True)
     
     # Divide x by its norm.
-    x = None
+    x = x/x_norm
     ### END CODE HERE ###
 
     return x
@@ -461,13 +461,13 @@ def softmax(x):
     
     ### START CODE HERE ### (≈ 3 lines of code)
     # Apply exp() element-wise to x. Use np.exp(...).
-    x_exp = None
+    x_exp = np.exp(x)
 
     # Create a vector x_sum that sums each row of x_exp. Use np.sum(..., axis = 1, keepdims = True).
-    x_sum = None
+    x_sum = np.sum(x_exp, axis = 1, keepdims = True)
     
     # Compute softmax(x) by dividing x_exp by x_sum. It should automatically use numpy broadcasting.
-    s = None
+    s = x_exp/x_sum
 
     ### END CODE HERE ###
     
