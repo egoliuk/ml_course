@@ -3,7 +3,7 @@ import math
 # import cv2
 
 from scipy import misc, ndimage
-from sklearn.utils import shuffle
+from sklearn.utils import shuffle as sklearn_shuffle
 
 from PIL import Image
 # 
@@ -12,19 +12,27 @@ from PIL import Image
 # plt.gray()
 
 ORL_dir = 'dataset/orl_faces'
+num_classes = 10
+percent_train_samples = .8
+percent_test_samples = .2
 image_width = 92
 image_height = 112
 
-def load_dataset():
+def load_dataset(shuffle=True):
     images, labels = load_imgs()
-    images, labels = shuffle(images, labels, random_state=0)
 
     images = np.asarray(images, dtype='float32').reshape([-1, image_width, image_height, 1])
 
     labels = np.asarray(labels)
     labels = labels.reshape((labels.shape[0], 1))
 
-    return split_dataset(images, labels)
+    if shuffle:
+        training_X, training_Y, test_X, test_Y = split_dataset(images, labels)
+        training_X, training_Y = sklearn_shuffle(training_X, training_Y, random_state=0)
+        test_X, test_Y = sklearn_shuffle(test_X, test_Y, random_state=0)
+        return training_X, training_Y, test_X, test_Y
+    else:
+        return split_dataset(images, labels)
 
 def load_imgs(dataset_dir = ORL_dir, img_shape = (image_width, image_height)):
     (images, labels, ID) = ([], [], 0)
@@ -52,10 +60,18 @@ def load_imgs(dataset_dir = ORL_dir, img_shape = (image_width, image_height)):
     return images, labels
 
 def split_dataset(dataset, labels):
-    training_X = dataset[:int(dataset.shape[0] * 0.8),:]
-    training_Y = labels[:int(labels.shape[0] * 0.8),:]
-    test_X = dataset[int(dataset.shape[0] * 0.8):,:]
-    test_Y = labels[int(labels.shape[0] * 0.8):,:]
+    num_train_samples_per_class = int(num_classes * percent_train_samples)
+    num_test_samples_per_class = num_classes - num_train_samples_per_class
+    dataset_length = labels.shape[0]
+
+    train_selection = np.resize(np.concatenate((np.repeat(True, num_train_samples_per_class), 
+                                                np.repeat(False, num_test_samples_per_class)), axis=0),
+                                (dataset_length, 1))
+
+    training_X = dataset[train_selection.flatten()]
+    training_Y = labels[train_selection].reshape((320, 1))
+    test_X = dataset[np.invert(train_selection.flatten())]
+    test_Y = labels[np.invert(train_selection)].reshape((80, 1))
     return training_X, training_Y, test_X, test_Y
 
 def normalize(images):
