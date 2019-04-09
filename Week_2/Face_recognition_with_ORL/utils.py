@@ -1,7 +1,15 @@
 import numpy as np, os
+import math
+# import cv2
 
-from scipy import misc
+from scipy import misc, ndimage
 from sklearn.utils import shuffle
+
+from PIL import Image
+# 
+# import matplotlib.pyplot as plt
+# %matplotlib inline
+# plt.gray()
 
 ORL_dir = 'dataset/orl_faces'
 image_width = 92
@@ -53,3 +61,37 @@ def split_dataset(dataset, labels):
 def normalize(images):
     images = images / 255
     return images
+
+def crop_center(img,cropx,cropy):
+    y,x = img.shape
+    startx = x//2-(cropx//2)
+    starty = y//2-(cropy//2)    
+    return img[starty*2:cropy,startx*2:cropx]
+
+def rotate_image(image, angle):
+    """
+    Rotates an OpenCV 2 / NumPy image about it centre by the given angle
+    (in degrees). The returned image will be large enough to hold the entire
+    new image, with a black background
+    """
+#     im = Image.fromarray(np.uint8(image))
+    imgWidth=image.shape[1];
+    imgHeight=image.shape[0];
+#     w = math.sin(angle * math.pi/180) * imgHeight + math.cos(angle * math.pi/180) * imgWidth;
+#     h = math.sin(angle * math.pi/180) * imgWidth + math.cos(angle * math.pi/180) * imgHeight;
+#     new = np.pad(image,((int((w - image.shape[0])/2),),(int((h-image.shape[1])/2),)),'constant')
+#     plus10_img = ndimage.interpolation.rotate(new, angle, cval=0.01, reshape=False)
+    
+    rotated_img = ndimage.interpolation.rotate(image, angle, cval=0.01, mode='constant', reshape=True)
+#     print("After rotation: ", rotated_img.shape)
+    cropped_img = crop_center(rotated_img, imgWidth, imgHeight)
+#     print("After crop: ", cropped_img.shape)
+    zoom_coeff = imgWidth/cropped_img.shape[1]
+#     print("Zoom coeff: ", zoom_coeff)
+    zoomed_img = ndimage.zoom(cropped_img, zoom_coeff)
+    vertical_offset = int((zoomed_img.shape[0] - imgHeight) / 2)
+#     print("After zoom: ", zoomed_img.shape)
+#     print("Vertical offset: ", vertical_offset)
+    out_img = zoomed_img[vertical_offset:vertical_offset+imgHeight, :]
+    
+    return out_img
