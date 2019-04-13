@@ -4,7 +4,8 @@ from scipy import misc, ndimage
 from sklearn.utils import shuffle as sklearn_shuffle
 
 ORL_dir = 'dataset/orl_faces'
-num_classes = 10
+num_classes = 40
+num_samples_per_class = 10
 percent_train_samples = .8
 percent_test_samples = .2
 image_width = 92
@@ -51,8 +52,8 @@ def load_imgs(dataset_dir = ORL_dir, img_shape = (image_width, image_height)):
     return images, labels
 
 def split_dataset(dataset, labels):
-    num_train_samples_per_class = int(num_classes * percent_train_samples)
-    num_test_samples_per_class = num_classes - num_train_samples_per_class
+    num_train_samples_per_class = int(num_samples_per_class * percent_train_samples)
+    num_test_samples_per_class = num_samples_per_class - num_train_samples_per_class
     dataset_length = labels.shape[0]
 
     train_selection = np.resize(np.concatenate((np.repeat(True, num_train_samples_per_class), 
