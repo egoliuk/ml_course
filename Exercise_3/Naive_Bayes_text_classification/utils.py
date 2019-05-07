@@ -1,10 +1,11 @@
 import pandas as pd
+import numpy as np
 from sklearn.utils import shuffle as sklearn_shuffle
 
 
 def load_dataset():
     data = pd.read_csv('dataset/data.csv',sep=',', header=None)
-    data.columns=['message', 'labels']
+    data.columns=['messages', 'labels']
     return (*split_dataset(data), data)
 
 def split_dataset(data):
@@ -24,4 +25,9 @@ def split_dataset(data):
     test_datasets = sklearn_shuffle(test_datasets, random_state=0)
     train_datasets = sklearn_shuffle(train_datasets, random_state=0)
 
-    return train_datasets, test_datasets
+    train_messages = np.array(train_datasets['messages']).reshape(train_datasets.shape[0], 1)
+    train_labels = np.array(train_datasets['labels']).reshape(train_datasets.shape[0], 1)
+    test_messages = np.array(test_datasets['messages']).reshape(test_datasets.shape[0], 1)
+    test_labels = np.array(test_datasets['labels']).reshape(test_datasets.shape[0], 1)
+
+    return train_messages, train_labels, test_messages, test_labels
